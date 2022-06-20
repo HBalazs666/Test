@@ -1,0 +1,308 @@
+openapi: 3.0.0
+servers:
+  - url: /
+info:
+  title: Example API
+  version: '0.1'
+paths:
+  /people:
+    get:
+      tags:
+        - People
+      operationId: api.get_people_list
+      summary: Get all people
+      responses:
+        '200':
+          description: Return all people
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+    post:
+      tags:
+        - People
+      operationId: api.create_person
+      summary: Create new Person
+      requestBody:
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+      responses:
+        '201':
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+  /pets:
+    get:
+      tags:
+        - Pets
+      operationId: api.get_pet_list
+      summary: Get all pets
+      responses:
+        '200':
+          description: Return all pet
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+    post:
+      tags:
+        - Pets
+      operationId: api.create_pet
+      summary: Create new Pet
+      requestBody:
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+      responses:
+        '201':
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+  /pets/{petId}:
+    get:
+      tags:
+        - Pets
+      operationId: api.get_pet
+      summary: Get all pets
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return all pet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+    delete:
+      tags:
+        - Pets
+      summary: Deletes a pet.
+      operationId: api.pet_delete
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+  /people/{personId}:
+    get:
+      tags:
+        - People
+      operationId: api.get_person
+      summary: Get a person
+      parameters:
+        - in: path
+          name: personId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return an owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        '400':
+          description: The specified user ID is invalid (not a number).
+        '404':
+          description: A user with the specified ID was not found.
+        default:
+          description: Unexpected error
+  # /people/{personId}/add-workplace:
+  #   post:
+  #     tags:
+  #       - People
+  #     operationId: app.person_add_workplace
+  #     summary: Adds a workplace to a person
+  #     parameters:
+  #       - in: path
+  #         name: personId
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int64
+  #     requestBody:
+  #       content:
+  #           application/json:
+  #             schema:
+  #               type: integer
+
+
+  /people/{personId}/pets:
+    get:
+      tags:
+        - People
+      operationId: api.get_persons_pets
+      summary: Get all pets of a person
+      parameters:
+        - in : path
+          name: personId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Returning pets of a person
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+        '400':
+          description: The specified user ID is invalid (not a number).
+        '404':
+          description: A user with the specified ID was not found.
+        default:
+          description: Unexpected error
+  /workplace:
+    get:
+      tags:
+        - Workplace
+      operationId: api.get_workplace_list
+      summary: get all the workplaces
+      responses:
+        '200':
+          description: Returning all of the workplaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workplace'
+    post:
+      tags:
+        - Workplace
+      operationId: api.create_workplace
+      summary: Create new Workplace
+      requestBody:
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workplace'
+      responses:
+        '201':
+          description: Successful creation
+          # content:
+          #   application/json:
+          #     schema:
+          #       $ref: '#/components/schemas/Workplace'
+  /workplace/{workplaceId}:
+    get:
+      tags:
+        - Workplace
+      operationId: api.get_workplace
+      summary: Get a workplace by ID
+      parameters:
+        - in: path
+          name: workplaceId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Return a workplace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workplace'
+        '400':
+          description: The specified workplace ID is invalid (not a number).
+        '404':
+          description: A workplace with the specified ID was not found.
+        default:
+          description: Unexpected error
+    delete:
+      tags:
+        - Workplace
+      summary: Deletes a workplace.
+      operationId: api.workplace_delete
+      parameters:
+        - in: path
+          name: workplaceId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+
+components:
+  schemas:
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        workplaces:
+          type: array
+      required:
+        - id
+        - email
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        owner:
+          type: integer
+      required:
+        - id
+        - name
+        - owner
+    Workplace:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        city:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - city
+        - title
+        - company
