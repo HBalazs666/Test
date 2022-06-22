@@ -288,7 +288,7 @@ components:
       required:
         - id
         - name
-        - owner
+        - owner_id
     Workplace:
       type: object
       properties:
