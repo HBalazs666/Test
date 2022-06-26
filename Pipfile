@@ -7,12 +7,15 @@ name = "pypi"
 sqlalchemy = "*"
 connexion = {extras = ["swagger-ui"], version = "*"}
 requests = "*"
+flask-sqlalchemy = "*"
+jsonschema = "<4.0.0"
 
 [dev-packages]
 ipython = "*"
 pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+pytest-flask-sqlalchemy = "*"
 
 [requires]
 python_version = "3.10"

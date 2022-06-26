@@ -1,33 +1,27 @@
-from sqlalchemy import Column, ForeignKey, Table
-from sqlalchemy import String
-from sqlalchemy import Integer
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import declarative_base, relationship
-# from main import db_session
+from main import db
 
 
-Base = declarative_base()
+class Base(db.Model):
+    __abstract__ = True
 
-association_table=Table(
+
+association_table = db.Table(
     'association',
     Base.metadata,
-    Column('person_id', ForeignKey('person.id')),
-    Column('workplace_id', ForeignKey('workplace.id'))
+    db.Column('person_id', db.ForeignKey('person.id')),
+    db.Column('workplace_id', db.ForeignKey('workplace.id'))
     )
 
 
 class Person(Base):
     __tablename__ = 'person'
-    id = Column(Integer, primary_key=True)
-    first_name = Column(String(254))
-    last_name = Column(String(254))
-    email = Column(String(254), nullable=False)
-    pets = relationship("Pet", back_populates='owner',
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(254))
+    last_name = db.Column(db.String(254))
+    email = db.Column(db.String(254), nullable=False)
+    pets = db.relationship("Pet", back_populates='owner',
                             cascade='all, delete-orphan')
-    workplaces = relationship('Workplace', secondary=association_table,
+    workplaces = db.relationship('Workplace', secondary=association_table,
                                 back_populates='workers')
 
 
@@ -46,7 +40,6 @@ class Person(Base):
             ret['workplaces'] = [workspace.dump() for workspace in self.workplaces]
         else:
             ret['workplaces'] = []
-        print(type(ret))
         return ret
 
     def __str__(self):
@@ -59,10 +52,10 @@ class Person(Base):
 
 class Pet(Base):
     __tablename__ = 'pet'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(254))
-    owner_id = Column(Integer, ForeignKey("person.id"))
-    owner = relationship("Person", back_populates='pets')
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(254))
+    owner_id = db.Column(db.Integer, db.ForeignKey("person.id"))
+    owner = db.relationship("Person", back_populates='pets')
 
 
     def dump(self):
@@ -80,11 +73,11 @@ class Pet(Base):
 
 class Workplace(Base):
     __tablename__ = 'workplace'
-    id = Column(Integer, primary_key=True)
-    city = Column(String(254))
-    company = Column(String(254))
-    title = Column(String(254))
-    workers = relationship('Person', secondary=association_table,
+    id = db.Column(db.Integer, primary_key=True)
+    city = db.Column(db.String(254))
+    company = db.Column(db.String(254))
+    title = db.Column(db.String(254))
+    workers = db.relationship('Person', secondary=association_table,
                                 back_populates='workplaces')
 
     def dump(self):
@@ -97,12 +90,3 @@ class Workplace(Base):
         # if self.workers is not None:
         #     ret['workers'] = self.workers
         return ret
-
-
-
-def init_db(uri):
-    engine = create_engine(uri, convert_unicode=True)
-    db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
-    Base.query = db_session.query_property()
-    Base.metadata.create_all(bind=engine)
-    return db_session

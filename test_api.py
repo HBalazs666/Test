@@ -1,60 +1,13 @@
-import json
-import orm
-import connexion
-# from main import application
-from orm import Person, Pet, Workplace
-from sqlalchemy import create_engine
-# from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
-# from sqlalchemy.orm import declarative_base, relationship
-import pytest
-
-flask_app = connexion.FlaskApp(__name__)
-flask_app.add_api('openapi.yaml')
-
-# def test_get_pet():
-#     url = '/pets'
-#     client = application.test_client()
-#     resp = client.get(url)
-#     print(resp.text)
-#     assert resp.status_code == 200
-
-@pytest.fixture(scope='function')
-def client():
-    with flask_app.app.test_client() as c:
-        yield c
-
-
-@pytest.fixture(scope="session")
-def connection():
-    engine = create_engine('sqlite:///test.db')
-    return engine.connect()
-
-
-@pytest.fixture(scope="session")
-def setup_database(connection):
-    orm.Base.metadata.bind = connection
-    orm.Base.metadata.create_all()
-
-    yield
-
-    orm.Base.metadata.drop_all()
-
-
-@pytest.fixture
-def db_session(setup_database, connection):
-    transaction = connection.begin()
-    yield scoped_session(
-        sessionmaker(autocommit=False, autoflush=False, bind=connection)
-    )
-    transaction.rollback()
+from orm import Person
+from orm import Pet
+from orm import Workplace
 
 
 def create_person(db_session):
     db_session.add(Person(first_name="Proba", email = 'proba@email'))
     db_session.commit()
     assert len(db_session.query(Person).all()) == 1
+
 
 def test_add_workplace(db_session):
     db_session.add(Person(first_name="Proba", email='proba@email'))
@@ -96,6 +49,7 @@ def test_workplace_delete(db_session):
     workplaces = db_session.query(Workplace).all()
     assert len(workplaces) == 1
 
+
 def test_create_workplace(db_session):
     db_session.add(Workplace(city="Budapest", company = 'Ericsson', title = 'Intern'))
     db_session.commit()
@@ -132,14 +86,14 @@ def test_get_pet_list(db_session):
 
 
 def test_get_pet(client, db_session):
-    db_session.add(Pet(name='proba1', owner_id=2))
+    db_session.add(Pet(name='proba1'))
     db_session.commit()
     url = '/pets'
     resp = client.get(url)
-    print(resp.text)
     assert resp.status_code == 200
-    # pet = db_session.query(Pet).filter_by(owner_id = 2).all()
-    assert resp.json[0]['name'] == 'proba1'
+    lst = resp.json
+    assert len(lst) == 1
+    assert lst[0]['name'] == 'proba1'
 
 
 def test_pet_delete(db_session):
