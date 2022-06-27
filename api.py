@@ -86,10 +86,10 @@ def create_person(body):
 
 def create_pet(body):
     name = body.get('name')
-    owner = body['owner']
+    owner_id = body['owner_id']
     p = Pet(
         name = name,
-        owner_id = owner
+        owner_id = owner_id
     )
     db.session.add(p)
     db.session.commit()

@@ -1,12 +1,20 @@
 from orm import Person
 from orm import Pet
 from orm import Workplace
+import json
 
 
-def create_person(db_session):
+def create_person(db_session, client):
     db_session.add(Person(first_name="Proba", email = 'proba@email'))
     db_session.commit()
     assert len(db_session.query(Person).all()) == 1
+
+    data = {
+                "email": "created@email.com"
+            }
+    url = '/person'
+    resp = client.post(url, json=data)
+    assert resp.status_code == 201
 
 
 def test_add_workplace(db_session):
@@ -31,15 +39,18 @@ def test_add_person(db_session):
     assert len(workplace.workers) == 1
 
 
-def test_get_workplace_list(db_session):
+def test_get_workplace_list(db_session, client):
     db_session.add(Workplace(city="Budapest", title='Intern', company='Ericsson'))
     db_session.add(Workplace(city="Rosenheim", title='Intern', company='Ericsson'))
     db_session.commit()
     workplaces = db_session.query(Workplace).all()
     assert len(workplaces) == 2
 
+    resp = client.get('/workplace')
+    assert resp.status_code == 200
 
-def test_workplace_delete(db_session):
+
+def test_workplace_delete(db_session, client):
     db_session.add(Workplace(city="Budapest", title='Intern', company='Ericsson'))
     db_session.add(Workplace(city="Rosenheim", title='Intern', company='Ericsson'))
     db_session.commit()
@@ -49,54 +60,99 @@ def test_workplace_delete(db_session):
     workplaces = db_session.query(Workplace).all()
     assert len(workplaces) == 1
 
+    url = '/workplace/1'
+    resp = client.delete(url)
+    assert resp.status_code == 204
 
-def test_create_workplace(db_session):
+
+def test_create_workplace(db_session, client):
     db_session.add(Workplace(city="Budapest", company = 'Ericsson', title = 'Intern'))
     db_session.commit()
     assert len(db_session.query(Workplace).all()) == 1
 
+    data = {
+                "city": "Budapest",
+                "company": "Ericsson",
+                "title": "Intern"
+            }
+    url = '/workplace'
+    resp = client.post(url, json=data)
+    assert resp.status_code == 201
 
-def test_get_workplace(db_session):
+
+def test_get_workplace(db_session, client):
     db_session.add(Workplace(city="Budapest", company = 'Ericsson', title = 'Intern'))
     db_session.commit()
     workplace = db_session.query(Workplace).filter_by(company = 'Ericsson').all()
     assert len(workplace) == 1
 
+    resp = client.get('/workplace')
+    assert resp.status_code == 200
+    lst = resp.json
+    assert len(lst) == 1
+    assert lst[0]['city'] == 'Budapest'
+    resp = client.get('/workplace')
 
-def test_get_people_list(db_session):
+
+def test_get_people_list(db_session, client):
     db_session.add(Person(email='example.email1'))
     db_session.add(Person(email='example.email2'))
     db_session.commit()
     people = db_session.query(Person).all()
     assert len(people) == 2
 
+    resp = client.get('/people')
+    assert resp.status_code == 200
 
-def test_create_pet(db_session):
-    db_session.add(Pet(name='proba', owner_id='probaowner'))
+
+def test_create_pet(db_session, client):
+    p = Person(email='proba')
+    db_session.add(p)
+    db_session.add(Pet(name='proba', owner=p))
     db_session.commit()
     assert len(db_session.query(Pet).all()) == 1
 
+    data = {
+                "name": "probacreate",
+                "owner_id": p.id
+            }
+    url = '/pets'
+    resp = client.post(url, json=data)
+    assert resp.status_code == 201
+    #lst = resp.json
+    #assert len(lst) == 1
+    #assert lst[0]['name'] == 'proba'
 
-def test_get_pet_list(db_session):
+
+
+
+def test_get_pet_list(db_session, client):
     db_session.add(Pet(name='proba1', owner_id=1))
     db_session.add(Pet(name='proba2', owner_id=2))
     db_session.commit()
     people = db_session.query(Pet).all()
+
     assert len(people) == 2
+    url = '/pets'
+    resp = client.get(url)
+    assert resp.status_code == 200
+    lst = resp.json
+    assert len(lst) == 2
+    assert lst[0]['name'] == 'proba1'
 
 
 def test_get_pet(client, db_session):
     db_session.add(Pet(name='proba1'))
     db_session.commit()
-    url = '/pets'
+
+    url = '/pets/1'
     resp = client.get(url)
     assert resp.status_code == 200
     lst = resp.json
-    assert len(lst) == 1
-    assert lst[0]['name'] == 'proba1'
+    assert lst['name'] == 'proba1'
 
 
-def test_pet_delete(db_session):
+def test_pet_delete(db_session, client):
     db_session.add(Pet(name='proba1', owner_id=1))
     db_session.add(Pet(name='proba2', owner_id=2))
     db_session.commit()
@@ -107,8 +163,12 @@ def test_pet_delete(db_session):
     pets = db_session.query(Pet).all()
     assert len(pets) == 1
 
+    url = '/pets/2'
+    resp = client.delete(url)
+    assert resp.status_code == 204
 
-def test_get_person(db_session):
+
+def test_get_person(db_session, client):
     db_session.add(Person(email='example@email1.com'))
     db_session.add(Person(email='example@email2.com'))
     db_session.add(Person(email='example@email3.com'))
@@ -116,8 +176,14 @@ def test_get_person(db_session):
     person = db_session.query(Person).filter_by(id = 1).all()
     assert len(person) == 1
 
+    url = '/people/1'
+    resp = client.get(url)
+    assert resp.status_code == 200
+    lst = resp.json
+    assert lst['email'] == 'example@email1.com'
 
-def test_get_persons_pets(db_session):
+
+def test_get_persons_pets(db_session, client):
     db_session.add(Person(email='example@email1.com'))
     db_session.add(Person(email='example@email2.com'))
     db_session.add(Pet(name='proba1', owner_id=1))
@@ -126,3 +192,9 @@ def test_get_persons_pets(db_session):
     db_session.commit()
     person = db_session.query(Person).filter_by(id = 1).all()
     assert len(person[0].pets) == 2
+
+    url = '/people/1/pets'
+    resp = client.get(url)
+    assert resp.status_code == 200
+    lst = resp.json
+    assert len(lst) == 2

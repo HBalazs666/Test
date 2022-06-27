@@ -283,7 +283,7 @@ components:
           readOnly: true
         name:
           type: string
-        owner:
+        owner_id:
           type: integer
       required:
         - id
