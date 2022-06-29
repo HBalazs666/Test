@@ -7,17 +7,25 @@ from connexion import NoContent
 
 
 def add_workplace(personId, workplaceId):
-    person = db.session.query(Person).filter(Person.id == personId).one_or_none()
-    workplace = db.session.query(Workplace).filter(Workplace.id == workplaceId).one_or_none()
-    person.workplaces.append(workplace)
+    person = db.session.query(Person).filter(
+                Person.id == personId).one_or_none()
+
+    workplace = db.session.query(Workplace).filter(
+                Workplace.id == workplaceId).one_or_none()
+
     db.session.commit()
+    person.workplaces.append(workplace)
 
 
 def add_person(personId, workplaceId):
-    person = db.session.query(Person).filter(Person.id == personId).one_or_none()
-    workplace = db.session.query(Workplace).filter(Workplace.id == workplaceId).one_or_none()
-    workplace.workers.append(person)
+    person = db.session.query(Person).filter(
+                Person.id == personId).one_or_none()
+
+    workplace = db.session.query(Workplace).filter(
+                Workplace.id == workplaceId).one_or_none()
     db.session.commit()
+
+    workplace.workers.append(person)
 
 
 def get_workplace_list():
@@ -27,7 +35,9 @@ def get_workplace_list():
 
 
 def workplace_delete(workplaceId):
-    workplace = db.session.query(Workplace).filter(Workplace.id == workplaceId).one_or_none()
+    workplace = db.session.query(Workplace).filter(
+                Workplace.id == workplaceId).one_or_none()
+
     if workplace is not None:
         db.session.delete(workplace)
         db.session.commit()
@@ -52,10 +62,13 @@ def create_workplace(body):
 
 
 def get_workplace(workplaceId):
-    workplace = db.session.query(Workplace).filter_by(id=workplaceId).one_or_none()
+    workplace = db.session.query(Workplace).filter_by(
+                                id=workplaceId).one_or_none()
+
     if workplace is None:
         return problem(404, 'Not found',
                        'Workplace does not exist.')
+
     lst = workplace.dump()
     return lst, 200
 
@@ -88,12 +101,13 @@ def create_pet(body):
     name = body.get('name')
     owner_id = body['owner_id']
     p = Pet(
-        name = name,
-        owner_id = owner_id
+        name=name,
+        owner_id=owner_id
     )
     db.session.add(p)
     db.session.commit()
     return p.dump(), 201
+
 
 def get_pet_list():
     pets = db.session.query(Pet)
@@ -101,6 +115,7 @@ def get_pet_list():
     #     return problem(404, 'Not found',
     #                    'List of pets is empty.')
     return [pet.dump() for pet in pets], 200
+
 
 def get_pet(petId):
     pet = db.session.query(Pet).filter_by(id=petId).one_or_none()
@@ -110,11 +125,10 @@ def get_pet(petId):
     lst = pet.dump()
     return lst, 200
 
+
 def pet_delete(petId):
     pet = db.session.query(Pet).filter(Pet.id == petId).one_or_none()
     if pet is not None:
-        #logging.info('Deleting pet %s..', pet_id)
-        # db.session.query(Pet).filter(Pet.id == petId).delete()
         db.session.delete(pet)
         db.session.commit()
         return NoContent, 204

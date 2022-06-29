@@ -132,26 +132,32 @@ paths:
           description: A user with the specified ID was not found.
         default:
           description: Unexpected error
-  # /people/{personId}/add-workplace:
-  #   post:
-  #     tags:
-  #       - People
-  #     operationId: app.person_add_workplace
-  #     summary: Adds a workplace to a person
-  #     parameters:
-  #       - in: path
-  #         name: personId
-  #         required: true
-  #         schema:
-  #           type: integer
-  #           format: int64
-  #     requestBody:
-  #       content:
-  #           application/json:
-  #             schema:
-  #               type: integer
-
-
+  /people/add-workplace:
+    post:
+      tags:
+        - People
+      operationId: api.add_workplace
+      summary: Adds a workplace to a person
+      parameters:
+        - in: query
+          name: personId
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: workplaceId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Workplace added to person
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
   /people/{personId}/pets:
     get:
       tags:
@@ -255,6 +261,32 @@ paths:
           description: No Content
         '404':
           description: Not Found
+  /workplace/add-workplace:
+    post:
+      tags:
+        - Workplace
+      operationId: api.add_person
+      summary: Adds a worker to a workplace
+      parameters:
+        - in: query
+          name: personId
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: workplaceId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Worker added to workplace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
 
 components:
   schemas:
