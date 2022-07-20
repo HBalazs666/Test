@@ -1,7 +1,15 @@
-FROM node:12-alpine
-RUN apk add --no-cache python2 g++ make
+FROM python:3.9-bullseye
+
+LABEL image="proba"
+
 WORKDIR /app
+
+COPY Pipfile Pipfile.lock ./
+
+RUN pip install pipenv && pipenv install --deploy --system
+
 COPY . .
-RUN yarn install --production
-CMD ["node", "src/index.js"]
-EXPOSE 3000
+
+EXPOSE 5000
+
+CMD ["python3", "./main.py"]
