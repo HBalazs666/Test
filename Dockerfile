@@ -1,6 +1,4 @@
-FROM python:3.9-bullseye
-
-LABEL image="proba"
+FROM python:3.10-bullseye
 
 WORKDIR /app
 
